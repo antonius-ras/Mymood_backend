@@ -93,7 +93,7 @@ export const userService = {
       profile_song_id: user.profile_song_id,
       show_uploads: user.show_uploads,
       song: user.profile_song_id ? song : null,
-      playlists: playlists.map(p => ({ ...p, track_count: p.playlist_tracks.length })),
+      playlists: playlists.map((p: any) => ({ ...p, track_count: p.playlist_tracks.length })),
       friend_count: friendCount,
       upload_count: uploadCount,
       friendship_status,

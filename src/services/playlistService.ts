@@ -4,14 +4,14 @@ export const playlistService = {
   async getMyPlaylists(userId: string) {
     const playlists = await playlistRepository.getMyPlaylists(userId);
     // Add track count as a convenience field
-    return playlists.map((p) => ({
+    return playlists.map((p: any) => ({
       id: p.id,
       name: p.name,
       description: p.description,
       cover_image_url: p.cover_image_url,
       created_at: p.created_at,
       track_count: p.playlist_tracks.length,
-      tracks: p.playlist_tracks.map((t) => t.songs),
+      tracks: p.playlist_tracks.map((t: any) => t.songs),
     }));
   },
 
@@ -43,7 +43,7 @@ export const playlistService = {
       ai_prompt_used: playlist.ai_prompt_used,
       created_at: playlist.created_at,
       track_count: playlist.playlist_tracks.length,
-      tracks: playlist.playlist_tracks.map((t) => ({
+      tracks: playlist.playlist_tracks.map((t: any) => ({
         track_id: t.id,
         order_index: t.order_index,
         ...t.songs,

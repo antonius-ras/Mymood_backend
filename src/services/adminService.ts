@@ -119,9 +119,9 @@ export const adminService = {
     const notifTitle = title || '📢 ประกาศจากผู้ดูแลระบบ';
     const userIds = await adminRepository.getAllUserIds();
     const results = await Promise.allSettled(
-      userIds.map(id => adminRepository.sendNotification(id, notifTitle, message))
+      userIds.map((id: string) => adminRepository.sendNotification(id, notifTitle, message))
     );
-    const sent = results.filter(r => r.status === 'fulfilled').length;
+    const sent = results.filter((r: PromiseSettledResult<any>) => r.status === 'fulfilled').length;
     return { sent, total: userIds.length };
   },
 
@@ -130,9 +130,9 @@ export const adminService = {
     const notifTitle = title || '📢 คิดถึงคุณนะ!';
     const userIds = await adminRepository.getInactiveUserIds(daysSince);
     const results = await Promise.allSettled(
-      userIds.map(id => adminRepository.sendNotification(id, notifTitle, message))
+      userIds.map((id: string) => adminRepository.sendNotification(id, notifTitle, message))
     );
-    const sent = results.filter(r => r.status === 'fulfilled').length;
+    const sent = results.filter((r: PromiseSettledResult<any>) => r.status === 'fulfilled').length;
     return { sent, total: userIds.length };
   },
 

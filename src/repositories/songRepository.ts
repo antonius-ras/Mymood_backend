@@ -1,5 +1,5 @@
 import prisma from '../config/prisma';
-import { Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 export const songRepository = {
   async getAllSongs() {
@@ -83,6 +83,7 @@ export const songRepository = {
   },
 
   // embedding column is Unsupported('vector') — must use raw SQL
+
   async createSongVector(songId: string, moodKeywords: string, embeddingArray: number[]) {
     const embeddingStr = `[${embeddingArray.join(',')}]`;
     await prisma.$executeRaw`
@@ -113,7 +114,12 @@ export const songRepository = {
     return results;
   },
 
-  async searchSongsByVectorWithExclude(embeddingArray: number[], matchThreshold: number, matchCount: number, excludeIds: string[] = []) {
+  async searchSongsByVectorWithExclude(
+    embeddingArray: number[],
+    matchThreshold: number,
+    matchCount: number,
+    excludeIds: string[] = []
+  ) {
     const embeddingStr = `[${embeddingArray.join(',')}]`;
     const overfetchCount = matchCount + excludeIds.length + 20;
 
@@ -127,6 +133,8 @@ export const songRepository = {
       `;
     }
 
+    // Prisma.join is not available on PrismaClient, so use a manual join
+    const excludeList = excludeIds.map((id) => `'${id}'`).join(',');
     return prisma.$queryRaw<any[]>`
       SELECT * FROM (
         SELECT * FROM match_songs(
@@ -135,7 +143,7 @@ export const songRepository = {
           ${overfetchCount}::int
         )
       ) AS matches
-      WHERE id NOT IN (${Prisma.join(excludeIds)})
+      WHERE id NOT IN (${excludeList})
       LIMIT ${matchCount}::int
     `;
   },
@@ -156,7 +164,8 @@ export const songRepository = {
       select: { user_id: true, friend_id: true },
     });
 
-    const friendIds = friendships.map((f) =>
+    type Friendship = { user_id: string; friend_id: string };
+    const friendIds = friendships.map((f: Friendship) =>
       f.user_id === userId ? f.friend_id : f.user_id
     );
 
@@ -168,7 +177,7 @@ export const songRepository = {
       select: { id: true },
     });
 
-    const visibleFriendIds = friendsWithUploadsVisible.map(f => f.id);
+    const visibleFriendIds = friendsWithUploadsVisible.map((f: { id: string }) => f.id);
     if (visibleFriendIds.length === 0) return [];
 
     return prisma.songs.findMany({
@@ -188,13 +197,14 @@ export const songRepository = {
 
     if (topPlays.length === 0) return [];
 
-    const songIds = topPlays.map((p) => p.song_id).filter((id): id is string => id !== null);
+    type TopPlay = { song_id: string | null };
+    const songIds = topPlays.map((p: TopPlay) => p.song_id).filter((id: string | null): id is string => id !== null);
 
     const songs = await prisma.songs.findMany({
       where: { id: { in: songIds } },
     });
 
     // Map output safely maintaining descending play history order natively
-    return songIds.map((id) => songs.find((s) => s.id === id)).filter(Boolean);
+    return songIds.map((id: string) => songs.find((s: { id: string }) => s.id === id)).filter(Boolean);
   },
 };

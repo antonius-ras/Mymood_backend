@@ -66,7 +66,7 @@ export const adminRepository = {
        GROUP BY DATE(created_at) ORDER BY day`,
       since
     );
-    return rows.map(r => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
+    return rows.map((r: { day: string; count: bigint }) => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
   },
 
   // Daily play counts for last N days
@@ -81,7 +81,7 @@ export const adminRepository = {
        GROUP BY DATE(played_at) ORDER BY day`,
       since
     );
-    return rows.map(r => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
+    return rows.map((r: { day: string; count: bigint }) => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
   },
 
   // ── Song Management ──
@@ -229,7 +229,7 @@ export const adminRepository = {
 
   async getAllUserIds() {
     const users = await prisma.users.findMany({ select: { id: true } });
-    return users.map(u => u.id);
+    return users.map((u: { id: string }) => u.id);
   },
 
   async getInactiveUserIds(daysSince: number) {
@@ -244,7 +244,7 @@ export const adminRepository = {
       },
       select: { id: true },
     });
-    return users.map(u => u.id);
+    return users.map((u: { id: string }) => u.id);
   },
 
   // ── Analytics ──
@@ -271,14 +271,14 @@ export const adminRepository = {
       take: limit,
     });
 
-    const songIds = songs.map(s => s.song_id).filter(Boolean) as string[];
+    const songIds = songs.map((s: { song_id: string | null }) => s.song_id).filter(Boolean) as string[];
     const songDetails = await prisma.songs.findMany({
       where: { id: { in: songIds } },
       select: { id: true, title: true, artist: true, cover_image_url: true, genre: true },
     });
 
-    return songs.map(s => {
-      const detail = songDetails.find(d => d.id === s.song_id);
+    return songs.map((s: { song_id: string | null; _count: { song_id: number } }) => {
+      const detail = songDetails.find((d: { id: string }) => d.id === s.song_id);
       return { ...detail, like_count: s._count.song_id };
     });
   },
@@ -289,7 +289,7 @@ export const adminRepository = {
       _count: { genre: true },
       orderBy: { _count: { genre: 'desc' } },
     });
-    return genres.map(g => ({
+    return genres.map((g: { genre: string | null; _count: { genre: number } }) => ({
       genre: g.genre || 'Unknown',
       count: g._count.genre,
     }));
@@ -305,7 +305,7 @@ export const adminRepository = {
        GROUP BY DATE(played_at) ORDER BY day`,
       since
     );
-    return rows.map(r => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
+    return rows.map((r: { day: string; count: bigint }) => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
   },
 
   async getNewUsersPerDay(days: number) {
@@ -318,7 +318,7 @@ export const adminRepository = {
        GROUP BY DATE(created_at) ORDER BY day`,
       since
     );
-    return rows.map(r => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
+    return rows.map((r: { day: string; count: bigint }) => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
   },
 
   async getUploadsPerDay(days: number) {
@@ -331,6 +331,6 @@ export const adminRepository = {
        GROUP BY DATE(created_at) ORDER BY day`,
       since
     );
-    return rows.map(r => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
+    return rows.map((r: { day: string; count: bigint }) => ({ day: String(r.day).slice(0, 10), count: Number(r.count) }));
   },
 };

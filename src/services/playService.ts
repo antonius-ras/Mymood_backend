@@ -16,6 +16,6 @@ export const playService = {
 
   async getRecentHistory(userId: string) {
     const rows = await playRepository.getRecentHistory(userId, 10);
-    return rows.map((r) => r.songs).filter(Boolean);
+    return rows.map((r: { songs: any }) => r.songs).filter(Boolean);
   },
 };
