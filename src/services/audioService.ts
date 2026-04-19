@@ -1,5 +1,4 @@
-// @ts-ignore
-import { Essentia, EssentiaWASM } from 'essentia.js';
+// Essentia will be imported dynamically only when needed
 import * as fs from 'fs';
 import path from 'path'; // 🌟 1. นำเข้าโมดูล path เพิ่มเข้ามา
 import ffmpeg from 'fluent-ffmpeg';
@@ -11,12 +10,20 @@ import wav from 'node-wav';
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 let essentia: any = null;
+let Essentia: any = null;
+let EssentiaWASM: any = null;
 
 const initEssentia = async () => {
-    if (!essentia) {
-        essentia = new Essentia(EssentiaWASM);
+  if (!essentia) {
+    // Dynamically import Essentia.js only when needed
+    if (!Essentia || !EssentiaWASM) {
+      const essentiaModule = await import('essentia.js');
+      Essentia = essentiaModule.Essentia;
+      EssentiaWASM = essentiaModule.EssentiaWASM;
     }
-    return essentia;
+    essentia = new Essentia(EssentiaWASM);
+  }
+  return essentia;
 };
 
 export const audioService = {

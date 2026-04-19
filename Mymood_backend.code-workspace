@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Baa/prisma"
+		},
+		{
+			"path": "../Baa/src"
+		},
+		{
+			"path": "../Baa/uploads"
+		}
+	],
+	"settings": {}
+}
