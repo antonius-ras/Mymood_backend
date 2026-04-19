@@ -8,22 +8,27 @@ export const adminService = {
     today.setHours(0, 0, 0, 0);
     const todayISO = today.toISOString();
 
+    const safe = async (fn: () => Promise<number>, label: string): Promise<number> => {
+      try { return await fn(); }
+      catch (e) { console.error(`⚠️ Stats query failed [${label}]:`, e); return 0; }
+    };
+
     const [
       userCount, songCount, shareCount, onlineUsers,
       todayNewUsers, todayActiveUsers, todaySongs, todayPlaylists,
       totalPlaylists, totalLikes, totalPlays,
     ] = await Promise.all([
-      adminRepository.countUsers(),
-      adminRepository.countSongs(),
-      adminRepository.countSharedInbox(),
-      adminRepository.countOnlineUsers(),
-      adminRepository.countNewUsersToday(todayISO),
-      adminRepository.countActiveUsersToday(todayISO),
-      adminRepository.countSongsToday(todayISO),
-      adminRepository.countPlaylistsToday(todayISO),
-      adminRepository.countPlaylists(),
-      adminRepository.countLikes(),
-      adminRepository.countPlays(),
+      safe(() => adminRepository.countUsers(), 'countUsers'),
+      safe(() => adminRepository.countSongs(), 'countSongs'),
+      safe(() => adminRepository.countSharedInbox(), 'countSharedInbox'),
+      safe(() => adminRepository.countOnlineUsers(), 'countOnlineUsers'),
+      safe(() => adminRepository.countNewUsersToday(todayISO), 'countNewUsersToday'),
+      safe(() => adminRepository.countActiveUsersToday(todayISO), 'countActiveUsersToday'),
+      safe(() => adminRepository.countSongsToday(todayISO), 'countSongsToday'),
+      safe(() => adminRepository.countPlaylistsToday(todayISO), 'countPlaylistsToday'),
+      safe(() => adminRepository.countPlaylists(), 'countPlaylists'),
+      safe(() => adminRepository.countLikes(), 'countLikes'),
+      safe(() => adminRepository.countPlays(), 'countPlays'),
     ]);
 
     return {
@@ -42,11 +47,21 @@ export const adminService = {
   },
 
   async getUserGrowthChart(days: number = 14) {
-    return adminRepository.getUserGrowth(days);
+    try {
+      return await adminRepository.getUserGrowth(days);
+    } catch (e) {
+      console.error('⚠️ getUserGrowthChart error:', e);
+      return [];
+    }
   },
 
   async getPlayGrowthChart(days: number = 14) {
-    return adminRepository.getPlayGrowth(days);
+    try {
+      return await adminRepository.getPlayGrowth(days);
+    } catch (e) {
+      console.error('⚠️ getPlayGrowthChart error:', e);
+      return [];
+    }
   },
 
   // ── Song Management ──
