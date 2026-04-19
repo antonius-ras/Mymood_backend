@@ -14,7 +14,6 @@ import friendRoutes from './routes/friendRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import playlistRoutes from './routes/playlistRoutes';
 import searchRoutes from './routes/searchRoutes';
-import prisma from './config/prisma';
 dotenv.config();
 
 const app = express();
@@ -40,21 +39,6 @@ app.use('/api/search', searchRoutes);
 
 app.get('/', (req, res) => {
   res.send('My Mood API is running! 🚀 (Serverless/Realtime Mode)');
-});
-
-// Health check — เปิดจากบราวเซอร์ได้เลย: /api/health
-app.get('/api/health', async (req, res) => {
-  const checks: Record<string, any> = { api: 'ok' };
-  try {
-    const userCount = await prisma.users.count();
-    checks.database = 'ok';
-    checks.userCount = userCount;
-  } catch (e: any) {
-    checks.database = 'error';
-    checks.dbError = e.message;
-  }
-  const status = checks.database === 'ok' ? 200 : 500;
-  res.status(status).json(checks);
 });
 
 app.listen(port, () => {
