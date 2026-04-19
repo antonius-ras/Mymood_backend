@@ -24,7 +24,7 @@ export const playlistService = {
     if (!songId) throw new Error('กรุณาส่ง song_id มาด้วยครับ');
     // Get current track count to assign correct order_index
     const existing = await playlistRepository.getMyPlaylists(userId);
-    const playlist = existing.find((p) => p.id === playlistId);
+    const playlist = existing.find((p: any) => p.id === playlistId);
     if (!playlist) throw new Error('ไม่พบ Playlist หรือคุณไม่มีสิทธิ์แก้ไข');
     const nextIndex = playlist.playlist_tracks.length;
     await playlistRepository.insertPlaylistTracks([{ playlist_id: playlistId, song_id: songId, order_index: nextIndex }]);
